@@ -29,35 +29,49 @@
 		private void InitializeComponent()
 		{
 			this.btn_Login = new System.Windows.Forms.Button();
-			this.textBox1 = new System.Windows.Forms.TextBox();
+			this.txt_Result = new System.Windows.Forms.TextBox();
+			this.lbl_Status = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// btn_Login
 			// 
-			this.btn_Login.Location = new System.Drawing.Point(219, 72);
+			this.btn_Login.Location = new System.Drawing.Point(17, 49);
 			this.btn_Login.Name = "btn_Login";
-			this.btn_Login.Size = new System.Drawing.Size(100, 56);
+			this.btn_Login.Size = new System.Drawing.Size(511, 87);
 			this.btn_Login.TabIndex = 0;
-			this.btn_Login.Text = "Login";
+			this.btn_Login.Text = "Generate Token";
 			this.btn_Login.UseVisualStyleBackColor = true;
 			this.btn_Login.Click += new System.EventHandler(this.btn_Login_Click);
 			// 
-			// textBox1
+			// txt_Result
 			// 
-			this.textBox1.Location = new System.Drawing.Point(219, 187);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(100, 31);
-			this.textBox1.TabIndex = 1;
+			this.txt_Result.Location = new System.Drawing.Point(17, 243);
+			this.txt_Result.Multiline = true;
+			this.txt_Result.Name = "txt_Result";
+			this.txt_Result.Size = new System.Drawing.Size(511, 171);
+			this.txt_Result.TabIndex = 1;
+			// 
+			// lbl_Status
+			// 
+			this.lbl_Status.AutoSize = true;
+			this.lbl_Status.Location = new System.Drawing.Point(12, 188);
+			this.lbl_Status.Name = "lbl_Status";
+			this.lbl_Status.Size = new System.Drawing.Size(322, 25);
+			this.lbl_Status.TabIndex = 2;
+			this.lbl_Status.Text = "Click on Generate Token to start";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(553, 299);
-			this.Controls.Add(this.textBox1);
+			this.ClientSize = new System.Drawing.Size(553, 426);
+			this.Controls.Add(this.lbl_Status);
+			this.Controls.Add(this.txt_Result);
 			this.Controls.Add(this.btn_Login);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+			this.MaximizeBox = false;
 			this.Name = "Form1";
-			this.Text = "Form1";
+			this.Text = "PKCE Token Form";
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.ResumeLayout(false);
 			this.PerformLayout();
@@ -67,7 +81,8 @@
 		#endregion
 
 		private System.Windows.Forms.Button btn_Login;
-		private System.Windows.Forms.TextBox textBox1;
+		private System.Windows.Forms.TextBox txt_Result;
+		private System.Windows.Forms.Label lbl_Status;
 	}
 }
 

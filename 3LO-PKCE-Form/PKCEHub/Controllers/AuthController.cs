@@ -25,13 +25,13 @@ public class AuthController : ControllerBase
 	
 
 	[HttpGet("callback")]
-	public async Task<ActionResult> Callback(string code, string state)
+	public async Task<string> Callback(string code, string state)
 	{
 		if (!String.IsNullOrEmpty(code))
 		{
 			PKCEHub.SendCode(_pkceHub, state, code);
-			return Redirect("You can close this window and continue in the form!");
+			return "You can close this window and continue in the form!";
 		}
-		return Redirect("An error occurred!");
+		return "An error occurred!";
 	}
 }

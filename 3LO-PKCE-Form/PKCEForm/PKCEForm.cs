@@ -12,6 +12,11 @@ using System.Windows.Forms;
 using System.Web;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System.Xml.Linq;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace PKCEForm
 {
@@ -19,12 +24,36 @@ namespace PKCEForm
 	{
 		static class Global
 		{
-			private static string _pkceCode = "";
+			private static string _codeVerifier = "";
 
-			public static string PKCECode
+			public static string codeVerifier
 			{
-				get { return _pkceCode; }
-				set { _pkceCode = value; }
+				get { return _codeVerifier; }
+				set { _codeVerifier = value; }
+			}
+
+			private static string _accessToken = "";
+
+			public static string AccessToken
+			{
+				get { return _accessToken; }
+				set { _accessToken = value; }
+			}
+
+			private static string _clientId = "";
+
+			public static string ClientId
+			{
+				get { return _clientId; }
+				set { _clientId = value; }
+			}
+
+			private static string _callbackUrl = "";
+
+			public static string CallbackURL
+			{
+				get { return _callbackUrl; }
+				set { _callbackUrl = value; }
 			}
 		}
 
@@ -48,16 +77,17 @@ namespace PKCEForm
 		private void btn_Login_Click(object sender, EventArgs e)
 		{
 			string codeVerifier = RandomString(64);
-			string pkceCode = GenerateCodeChallenge(codeVerifier);
-			Global.PKCECode = pkceCode;
-			string clientId = Properties.Resources.ClientId;
-			string callbaclUrl = Properties.Resources.CallbackUrl;
-			redirectToLogin(connection.ConnectionId, pkceCode, clientId, callbaclUrl);
+			string codeChallenge = GenerateCodeChallenge(codeVerifier);
+			Global.codeVerifier = codeVerifier;
+			Global.ClientId = Properties.Resources.ClientId;
+			Global.CallbackURL = Properties.Resources.CallbackUrl;
+			redirectToLogin(connection.ConnectionId, codeChallenge);
+			lbl_Status.Text = "Proceed in the browser!";
 		}
 
-		private void redirectToLogin(string connectionId, string pkceCode, string clientId, string callbackUrl)
+		private void redirectToLogin(string connectionId, string codeChallenge)
 		{
-			System.Diagnostics.Process.Start($"https://developer.api.autodesk.com/authentication/v2/authorize?response_type=code&client_id={clientId}&redirect_uri={HttpUtility.UrlEncode(callbackUrl)}&scope=data:read&prompt=login&state={connectionId}&code_challenge={pkceCode}&code_challenge_method=S256");
+			System.Diagnostics.Process.Start($"https://developer.api.autodesk.com/authentication/v2/authorize?response_type=code&client_id={Global.ClientId}&redirect_uri={HttpUtility.UrlEncode(Global.CallbackURL)}&scope=data:read&prompt=login&state={connectionId}&code_challenge={codeChallenge}&code_challenge_method=S256");
 		}
 
 		private static string GenerateNonce()
@@ -98,14 +128,57 @@ namespace PKCEForm
 			try
 			{
 				connection.StartAsync();
-				connection.On<string>("ReceiveCode", (authCode) =>
+				connection.On<string>("ReceiveCode", async (authCode) =>
 				{
-					Console.WriteLine(authCode);
+					try
+					{
+						await GetPKCEToken(authCode);
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine(ex.Message);
+					}
+					
 				});
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex.Message);
+				lbl_Status.Text = "An error occurred!";
+				txt_Result.Text = ex.Message;
+			}
+		}
+
+		private async Task GetPKCEToken(string authCode)
+		{
+			try
+			{
+				var client = new HttpClient();
+				var request = new HttpRequestMessage
+				{
+					Method = HttpMethod.Post,
+					RequestUri = new Uri("https://developer.api.autodesk.com/authentication/v2/token"),
+					Content = new FormUrlEncodedContent(new Dictionary<string, string>
+					{
+							{ "client_id", Global.ClientId },
+							{ "code_verifier", Global.codeVerifier },
+							{ "code", authCode},
+							{ "grant_type", "authorization_code" },
+							{ "redirect_uri", Global.CallbackURL }
+					}),
+				};
+				using (var response = await client.SendAsync(request))
+				{
+					response.EnsureSuccessStatusCode();
+					string bodystring = await response.Content.ReadAsStringAsync();
+					JObject bodyjson = JObject.Parse(bodystring);
+					lbl_Status.Text = "You can find your token below";
+					txt_Result.Text = bodyjson["access_token"].Value<string>();
+				}
+			}
+			catch (Exception ex)
+			{
+				lbl_Status.Text = "An error occurred!";
+				txt_Result.Text = ex.Message;
 			}
 		}
 	}
