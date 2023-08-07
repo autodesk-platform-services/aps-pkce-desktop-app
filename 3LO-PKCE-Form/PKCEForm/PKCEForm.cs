@@ -17,6 +17,17 @@ namespace PKCEForm
 {
 	public partial class Form1 : Form
 	{
+		static class Global
+		{
+			private static string _pkceCode = "";
+
+			public static string PKCECode
+			{
+				get { return _pkceCode; }
+				set { _pkceCode = value; }
+			}
+		}
+
 		HubConnection connection;
 		private static Random random = new Random();
 		public Form1()
@@ -38,8 +49,9 @@ namespace PKCEForm
 		{
 			string codeVerifier = RandomString(64);
 			string pkceCode = GenerateCodeChallenge(codeVerifier);
-			string clientId = "IkYnyadOeztikE3gsh3L8mUU07gZQkjO";
-			string callbaclUrl = "http://localhost:8080/api/auth/callback";
+			Global.PKCECode = pkceCode;
+			string clientId = Properties.Resources.ClientId;
+			string callbaclUrl = Properties.Resources.CallbackUrl;
 			redirectToLogin(connection.ConnectionId, pkceCode, clientId, callbaclUrl);
 		}
 
@@ -68,7 +80,7 @@ namespace PKCEForm
 					.Select(s => s[random.Next(s.Length)]).ToArray());
 
 		//Note: The use of the Random class makes this unsuitable for anything security related, such as creating passwords or tokens.Use the RNGCryptoServiceProvider class if you need a strong random number generator
-	}
+		}
 
 		private static string GenerateCodeChallenge(string codeVerifier)
 		{
@@ -79,11 +91,6 @@ namespace PKCEForm
 			code = Regex.Replace(code, "\\/", "_");
 			code = Regex.Replace(code, "=+$", "");
 			return code;
-		}
-
-		private string GeneratePKCECode()
-		{
-			throw new NotImplementedException();
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
