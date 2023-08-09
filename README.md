@@ -27,10 +27,8 @@ Where:
 
 2 – app redirects the user to authorization server
 
-3 – after loging in and allowing access, authorization server sends credential code to call-back url
+3 – after logging in and allowing access, authorization server sends credential code to call-back url and this request is intercepted by the desktop app.
 
-4 – web app receives the code and sends it to desktop app using SignalR
+4 – Desktop app sends credential code with code verifier to Exchange it for a token
 
-5 – Desktop app sends credential code with code verifier to Exchange it for a token
-
-6 – Oauth API returns the token (including refresh token) to desktop app
+5 – Oauth API returns the token (including refresh token) to desktop app
