@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Xml.Linq;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace PKCEForm
 {
@@ -57,21 +58,10 @@ namespace PKCEForm
 			}
 		}
 
-		HubConnection connection;
 		private static Random random = new Random();
 		public Form1()
 		{
 			InitializeComponent();
-
-			connection = new HubConnectionBuilder()
-								.WithUrl("http://localhost:8080/pkcehub")
-								.Build();
-
-			connection.Closed += async (error) =>
-			{
-				await Task.Delay(3000);
-				await connection.StartAsync();
-			};
 		}
 
 		private void btn_Login_Click(object sender, EventArgs e)
@@ -81,13 +71,69 @@ namespace PKCEForm
 			Global.codeVerifier = codeVerifier;
 			Global.ClientId = Properties.Resources.ClientId;
 			Global.CallbackURL = Properties.Resources.CallbackUrl;
-			redirectToLogin(connection.ConnectionId, codeChallenge);
+			redirectToLogin(codeChallenge);
 			lbl_Status.Text = "Proceed in the browser!";
 		}
 
-		private void redirectToLogin(string connectionId, string codeChallenge)
+		private void redirectToLogin(string codeChallenge)
 		{
-			System.Diagnostics.Process.Start($"https://developer.api.autodesk.com/authentication/v2/authorize?response_type=code&client_id={Global.ClientId}&redirect_uri={HttpUtility.UrlEncode(Global.CallbackURL)}&scope=data:read&prompt=login&state={connectionId}&code_challenge={codeChallenge}&code_challenge_method=S256");
+			string[] prefixes =
+			{
+				"http://localhost:8080/api/auth/"
+			};
+			System.Diagnostics.Process.Start($"https://developer.api.autodesk.com/authentication/v2/authorize?response_type=code&client_id={Global.ClientId}&redirect_uri={HttpUtility.UrlEncode(Global.CallbackURL)}&scope=data:read&prompt=login&code_challenge={codeChallenge}&code_challenge_method=S256");
+			SimpleListenerExample(prefixes);
+		}
+
+		// This example requires the System and System.Net namespaces.
+		public async Task SimpleListenerExample(string[] prefixes)
+		{
+			if (!HttpListener.IsSupported)
+			{
+				Console.WriteLine("Windows XP SP2 or Server 2003 is required to use the HttpListener class.");
+				return;
+			}
+			// URI prefixes are required,
+			// for example "http://contoso.com:8080/index/".
+			if (prefixes == null || prefixes.Length == 0)
+				throw new ArgumentException("prefixes");
+
+			// Create a listener.
+			HttpListener listener = new HttpListener();
+			// Add the prefixes.
+			foreach (string s in prefixes)
+			{
+				listener.Prefixes.Add(s);
+			}
+			listener.Start();
+			//Console.WriteLine("Listening...");
+			// Note: The GetContext method blocks while waiting for a request.
+			HttpListenerContext context = listener.GetContext();
+			HttpListenerRequest request = context.Request;
+			// Obtain a response object.
+			HttpListenerResponse response = context.Response;
+
+			try
+			{
+				string authCode = request.Url.Query.ToString().Split('=')[1];
+				await GetPKCEToken(authCode);
+			}
+			catch (Exception ex)
+			{
+				lbl_Status.Text = "An error occurred!";
+				txt_Result.Text = ex.Message;
+			}
+
+			// Construct a response.
+			string responseString = "<HTML><BODY> You can move to the form!</BODY></HTML>";
+			byte[] buffer = System.Text.Encoding.UTF8.GetBytes(responseString);
+			// Get a response stream and write the response to it.
+			response.ContentLength64 = buffer.Length;
+			System.IO.Stream output = response.OutputStream;
+			output.Write(buffer, 0, buffer.Length);
+			// You must close the output stream.
+			output.Close();
+			listener.Stop();
 		}
 
 		private static string GenerateNonce()
@@ -121,31 +167,6 @@ namespace PKCEForm
 			code = Regex.Replace(code, "\\/", "_");
 			code = Regex.Replace(code, "=+$", "");
 			return code;
-		}
-
-		private void Form1_Load(object sender, EventArgs e)
-		{
-			try
-			{
-				connection.StartAsync();
-				connection.On<string>("ReceiveCode", async (authCode) =>
-				{
-					try
-					{
-						await GetPKCEToken(authCode);
-					}
-					catch (Exception ex)
-					{
-						Console.WriteLine(ex.Message);
-					}
-					
-				});
-			}
-			catch (Exception ex)
-			{
-				lbl_Status.Text = "An error occurred!";
-				txt_Result.Text = ex.Message;
-			}
 		}
 
 		private async Task GetPKCEToken(string authCode)
