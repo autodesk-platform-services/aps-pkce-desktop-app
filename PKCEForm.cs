@@ -1,23 +1,16 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Web;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Xml.Linq;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Net.Http;
 
 namespace PKCEForm
 {
