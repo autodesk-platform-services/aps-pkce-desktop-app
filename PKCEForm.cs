@@ -34,6 +34,14 @@ namespace PKCEForm
 				set { _accessToken = value; }
 			}
 
+			private static string _refreshToken = "";
+
+			public static string RefreshToken
+			{
+				get { return _refreshToken; }
+				set { _refreshToken = value; }
+			}
+
 			private static string _clientId = "";
 
 			public static string ClientId
@@ -148,7 +156,7 @@ namespace PKCEForm
 			return new string(Enumerable.Repeat(chars, length)
 					.Select(s => s[random.Next(s.Length)]).ToArray());
 
-		//Note: The use of the Random class makes this unsuitable for anything security related, such as creating passwords or tokens.Use the RNGCryptoServiceProvider class if you need a strong random number generator
+			//Note: The use of the Random class makes this unsuitable for anything security related, such as creating passwords or tokens.Use the RNGCryptoServiceProvider class if you need a strong random number generator
 		}
 
 		private static string GenerateCodeChallenge(string codeVerifier)
@@ -176,8 +184,44 @@ namespace PKCEForm
 							{ "client_id", Global.ClientId },
 							{ "code_verifier", Global.codeVerifier },
 							{ "code", authCode},
+							{ "scope", "data:read" },
 							{ "grant_type", "authorization_code" },
 							{ "redirect_uri", Global.CallbackURL }
+					}),
+				};
+
+				using (var response = await client.SendAsync(request))
+				{
+					response.EnsureSuccessStatusCode();
+					string bodystring = await response.Content.ReadAsStringAsync();
+					JObject bodyjson = JObject.Parse(bodystring);
+					lbl_Status.Text = "You can find your token below";
+					txt_Result.Text = Global.AccessToken = bodyjson["access_token"].Value<string>();
+					Global.RefreshToken = bodyjson["refresh_token"].Value<string>();
+				}
+			}
+			catch (Exception ex)
+			{
+				lbl_Status.Text = "An error occurred!";
+				txt_Result.Text = ex.Message;
+			}
+		}
+
+		private async void btn_Refresh_Click(object sender, EventArgs e)
+		{
+			try
+			{
+				var client = new HttpClient();
+				var request = new HttpRequestMessage
+				{
+					Method = HttpMethod.Post,
+					RequestUri = new Uri("https://developer.api.autodesk.com/authentication/v2/token"),
+					Content = new FormUrlEncodedContent(new Dictionary<string, string>
+					{
+							{ "scope", "data:read" },
+							{ "grant_type", "refresh_token" },
+							{ "refresh_token", Global.RefreshToken },
+							{ "client_id", Global.ClientId }
 					}),
 				};
 				using (var response = await client.SendAsync(request))
@@ -185,8 +229,9 @@ namespace PKCEForm
 					response.EnsureSuccessStatusCode();
 					string bodystring = await response.Content.ReadAsStringAsync();
 					JObject bodyjson = JObject.Parse(bodystring);
-					lbl_Status.Text = "You can find your token below";
-					txt_Result.Text = bodyjson["access_token"].Value<string>();
+					lbl_Status.Text = "You can find your new token below";
+					txt_Result.Text = Global.AccessToken = bodyjson["access_token"].Value<string>();
+					Global.RefreshToken = bodyjson["refresh_token"].Value<string>();
 				}
 			}
 			catch (Exception ex)
