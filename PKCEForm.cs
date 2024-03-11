@@ -91,8 +91,7 @@ namespace PKCEForm
 		{
 			if (!HttpListener.IsSupported)
 			{
-				Console.WriteLine("Windows XP SP2 or Server 2003 is required to use the HttpListener class.");
-				return;
+                throw new NotSupportedException("HttpListener is not supported in this context!");
 			}
 			// URI prefixes are required,
 			// for example "http://contoso.com:8080/index/".
