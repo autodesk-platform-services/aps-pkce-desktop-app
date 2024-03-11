@@ -29,15 +29,13 @@ We used the workflow below to obtain the token
 
 Where:
 
-1 – user access the Desktop app
+A – The user access the Desktop app and the app redirects the user to authorization server with app credential and a code challenge generated from a random string used as a code verifier.
 
-2 – app redirects the user to authorization server
+B – After logging in and allowing access, authorization server sends credential code to call-back url and this request is intercepted by the desktop app.
 
-3 – after logging in and allowing access, authorization server sends credential code to call-back url and this request is intercepted by the desktop app.
+C – Desktop app sends credential code with code verifier to Exchange it for a token
 
-4 – Desktop app sends credential code with code verifier to Exchange it for a token
-
-5 – Oauth API returns the token (including refresh token) to desktop app
+D – Oauth API returns the token (including refresh token) to desktop app
 
 # Setup
 
@@ -73,4 +71,4 @@ This sample is licensed under the terms of the [MIT License](http://opensource.o
 
 ## Written by
 
-João Martins [@JooPaulodeOrne2](http://twitter.com/JooPaulodeOrne2), [APS Partner Development](http://aps.autodesk.com)
+João Martins [in/jpornelas](https://linkedin.com/in/jpornelas), Adam Nagy [in/adamnagy](https://www.linkedin.com/in/adamnagy) [APS Partner Development](http://aps.autodesk.com)
