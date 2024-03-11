@@ -19,9 +19,11 @@ Where:
 
 1 – Clicking on generate token triggers the process
 
-2 – Once it’s done, token will be posted in the texbox
+2 – You also have the option to refresh a token with the button
 
-I uses the workflow below to obtain the token
+3 - Once the process is done, the token will be posted in the texbox
+
+We used the workflow below to obtain the token
 
 ![diagram](./assets/workflow.png)
 
@@ -61,7 +63,7 @@ Go to properties folder and then double-click on resources and change **client i
 
 1. **Not being redirected**: Make sure to add your callback url to your aps app.
 
-2. **Not retrieving the token**: Make sure you've provided the proper callback to httplistener 
+2. **Not retrieving the token**: Make sure you've provided the proper callback to httplistener
 
 3. **Not able to read ACC/BIM 360 data with acquired token**: Make sure to provision the APS App Client ID within the BIM 360 Account, [learn more here](https://aps.autodesk.com/blog/bim-360-docs-provisioning-forge-apps). This requires the Account Admin permission.
 
