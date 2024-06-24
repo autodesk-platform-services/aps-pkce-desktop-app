@@ -57,6 +57,14 @@ namespace PKCEForm
 				get { return _callbackUrl; }
 				set { _callbackUrl = value; }
 			}
+
+            private static string _scopes = "";
+
+            public static string Scopes
+            {
+                get { return _scopes; }
+                set { _scopes = value; }
+            }
 		}
 
 		private static Random random = new Random();
@@ -72,7 +80,8 @@ namespace PKCEForm
 			Global.codeVerifier = codeVerifier;
 			Global.ClientId = Properties.Resources.ClientId;
 			Global.CallbackURL = Properties.Resources.CallbackUrl;
-			redirectToLogin(codeChallenge);
+            Global.Scopes = Properties.Resources.Scopes;
+            redirectToLogin(codeChallenge);
 			lbl_Status.Text = "Proceed in the browser!";
 		}
 
@@ -80,9 +89,9 @@ namespace PKCEForm
 		{
 			string[] prefixes =
 			{
-				"http://localhost:8080/api/auth/"
-			};
-			System.Diagnostics.Process.Start($"https://developer.api.autodesk.com/authentication/v2/authorize?response_type=code&client_id={Global.ClientId}&redirect_uri={HttpUtility.UrlEncode(Global.CallbackURL)}&scope=data:read&prompt=login&code_challenge={codeChallenge}&code_challenge_method=S256");
+                Global.CallbackURL
+            };
+			System.Diagnostics.Process.Start($"https://developer.api.autodesk.com/authentication/v2/authorize?response_type=code&client_id={Global.ClientId}&redirect_uri={HttpUtility.UrlEncode(Global.CallbackURL)}&scope={Global.Scopes}&prompt=login&code_challenge={codeChallenge}&code_challenge_method=S256");
 			SimpleListenerExample(prefixes);
 		}
 
@@ -170,7 +179,7 @@ namespace PKCEForm
 							{ "client_id", Global.ClientId },
 							{ "code_verifier", Global.codeVerifier },
 							{ "code", authCode},
-							{ "scope", "data:read" },
+							{ "scope", Global.Scopes },
 							{ "grant_type", "authorization_code" },
 							{ "redirect_uri", Global.CallbackURL }
 					}),

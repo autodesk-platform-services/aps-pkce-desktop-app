@@ -61,7 +61,7 @@ namespace PKCEForm.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://localhost:8080/api/auth/callback.
+        ///   Looks up a localized string similar to http://localhost:8080/.
         /// </summary>
         internal static string CallbackUrl {
             get {
@@ -70,11 +70,20 @@ namespace PKCEForm.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to IkYnyadOeztikE3gsh3L8mUU07gZQkjO.
+        ///   Looks up a localized string similar to xSBKOWGkAB06S7rWidGFD2m9vznKfMBD02gzOXiyPUYqAbuy.
         /// </summary>
         internal static string ClientId {
             get {
                 return ResourceManager.GetString("ClientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to data:read data:write.
+        /// </summary>
+        internal static string Scopes {
+            get {
+                return ResourceManager.GetString("Scopes", resourceCulture);
             }
         }
     }
